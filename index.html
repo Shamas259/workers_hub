@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workers Hub</title>
+  <style>
+    :root {
+      --radius: 12px;
+      --shadow: 0 20px 40px -10px rgba(0,0,0,0.08);
+      --transition: 0.25s cubic-bezier(.4,.2,.2,1);
+      --blue: #4A6CFF;
+      --bg: #f5f8ff;
+      --text: #0f1e2f;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    }
+
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      background: white;
+      color: var(--text);
+      line-height:1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1rem 4rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap:6px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #1b2438;
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+
+    .hero {
+      background: linear-gradient(135deg,#f0f5ff 0%,#d9dfff 60%);
+      border-radius: 20px;
+      padding: 2rem 2rem 3rem;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 2rem;
+    }
+
+    .hero-title {
+      font-size: clamp(1.8rem, 2.5vw, 3rem);
+      font-weight: 700;
+      margin: 0 0 1rem;
+    }
+
+    .search-wrapper {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      flex:1;
+      min-width: 180px;
+      border: none;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    }
+
+    .search-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 120px;
+      transition: var(--transition);
+    }
+    .search-btn:hover { filter: brightness(1.1); }
+
+    .popular-services {
+      margin-top: 1.5rem;
+    }
+
+    .service-cards {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin: 8px 0;
+    }
+    .service-card {
+      flex: 0 0 140px;
+      background: white;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap:6px;
+      box-shadow: var(--shadow);
+      position: relative;
+      min-width: 140px;
+    }
+    .service-card img {
+      width: 100%;
+      border-radius: 8px;
+      object-fit: cover;
+      height: 80px;
+    }
+    .service-label {
+      margin-top: auto;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .cards-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .nearby, .recommendations {
+      margin-top: 1.5rem;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card-list {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .profile-card {
+      flex: 0 0 260px;
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      min-width: 220px;
+    }
+    .profile-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #dde7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-info {
+      flex:1;
+    }
+    .name {
+      font-weight: 600;
+      margin:0;
+      font-size: 0.95rem;
+    }
+    .role {
+      margin:2px 0 0;
+      font-size: 0.7rem;
+      color: #555;
+    }
+    .rating {
+      display: flex;
+      align-items: center;
+      gap:6px;
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+    .book-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      align-self: flex-start;
+      transition: var(--transition);
+    }
+    .book-btn:hover { filter: brightness(1.05); }
+
+    .footer-cards {
+      display: flex;
+      gap:1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    /* Mobile card on right (simulated) */
+    .mobile-preview {
+      background: white;
+      border-radius: 30px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      font-size: 14px;
+    }
+    .mobile-frame {
+      border: 1px solid #e8ecf5;
+      border-radius: 32px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 360px;
+      position: relative;
+    }
+
+    .booking-section {
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .booking-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #cfe2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    .booking-info {
+      flex:1;
+    }
+    .booking-name {
+      margin:0;
+      font-weight:600;
+      font-size:0.85rem;
+    }
+    .booking-meta {
+      font-size:0.65rem;
+      color:#666;
+      margin-top:2px;
+    }
+    .chat-btn {
+      background: #eef5ff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .mobile-hide { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div style="font-size:1.5rem; color: #4A6CFF; font-weight:700;">W</div>
+        <div>Workers Hub</div>
+      </div>
+      <nav class="nav">
+        <a href="#">Home</a>
+        <a href="#">Services</a>
+        <a href="#">Login</a>
+        <button class="btn-primary">Register</button>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1 class="hero-title">Find Trusted Professionals for Your Needs</h1>
+          <div class="search-wrapper">
+            <input class="search-input" placeholder="Search for a service..." />
+            <button class="search-btn">Search</button>
+          </div>
+
+          <div class="popular-services">
+            <div class="section-header">
+              <div style="font-size:1rem;">Popular Services</div>
+              <div style="font-size:0.85rem; color:#555;">Home &nbsp; Appliance Repair &nbsp; Beauty &nbsp; Medical</div>
+            </div>
+            <div class="service-cards">
+              <div class="service-card">
+                <div style="display:flex; justify-content:center; padding-top:6px;">
+                  <!-- placeholder icon -->
+                  <div style="width:36px; height:36px; background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center;">🔧</div>
+                </div>
+                <div class="service-label">Electrician</div>
+              </div>
+              <div class="service-card">
+                <div style="display:flex; justify-content:center; padding-top:6px;">
+                  <div style="width:36px; height:36px; background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center;">🚰</div>
+                </div>
+                <div class="service-label">Plumber</div>
+              </div>
+              <div class="service-card">
+                <div style="display:flex; justify-content:center; padding-top:6px;">
+                  <div style="width:36px; height:36px; background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center;">💄</div>
+                </div>
+                <div class="service-label">Beauty Services</div>
+              </div>
+              <div class="service-card">
+                <div style="display:flex; justify-content:center; padding-top:6px;">
+                  <div style="width:36px; height:36px; background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center;">❄</div>
+                </div>
+                <div class="service-label">AC Repair</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile-style preview on right -->
+        <div class="mobile-preview">
+          <div class="mobile-frame">
+            <div style="padding:16px;">
+              <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:14px;">
+                <div style="font-weight:600; font-size:1rem; display:flex; gap:6px; align-items:center;">
+                  <div style="font-size:1.4rem; color: #4A6CFF;">W</div>
+                  <div>Workers Hub</div>
+                </div>
+                <div>🔔</div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <h2 style="margin:0;font-size:1.35rem;font-weight:700;">Find Trusted Professionals for Your Needs</h2>
+              </div>
+              <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <input style="flex:1; padding:10px 14px; border-radius:10px; border:none; outline:none; background:#f0f5ff;" placeholder="Search for a service..." />
+                <button style="border:none; padding:10px 14px; border-radius:10px; background: var(--blue); color:#fff; font-weight:600; cursor:pointer;">Search</button>
+              </div>
+              <div style="margin-top:6px;">
+                <div style="font-weight:600; margin-bottom:6px;">Popular Near You</div>
+                <div style="display:flex; gap:8px; overflow-x:auto;">
+                  <div style="background:#fff; border-radius:14px; padding:10px; min-width:140px; box-shadow: var(--shadow);">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <div style="width:32px; height:32px; border-radius:50%; background:#d9e7ff; display:flex; align-items:center; justify-content:center;">S</div>
+                      <div>
+                        <div style="font-weight:600; font-size:0.9rem;">Sophia Los</div>
+                        <div style="font-size:0.65rem; color:#555;">4.5 mp§</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="background:#fff; border-radius:14px; padding:10px; min-width:140px; box-shadow: var(--shadow);">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <div style="width:32px; height:32px; border-radius:50%; background:#ffe7f0; display:flex; align-items:center; justify-content:center;">B</div>
+                      <div>
+                        <div style="font-weight:600; font-size:0.9rem;">Berijamln</div>
+                        <div style="font-size:0.65rem; color:#555;">8 / 6 milz</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="background:#fff; border-radius:14px; padding:10px; min-width:140px; box-shadow: var(--shadow);">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <div style="width:32px; height:32px; border-radius:50%; background:#e6f7ff; display:flex; align-items:center; justify-content:center;">P</div>
+                      <div>
+                        <div style="font-weight:600; font-size:0.9rem;">Phya She</div>
+                        <div style="font-size:0.65rem; color:#555;">90$ hrin</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;">
+                <div style="font-weight:600; margin-bottom:6px;">Your Bookings</div>
+                <div class="booking-section">
+                  <div class="booking-avatar">B</div>
+                  <div class="booking-info">
+                    <p class="booking-name" style="margin:0;">Benjamin Wright</p>
+                    <p class="booking-meta" style="margin:0;">May 30, 4 pir 4.5 am</p>
+                  </div>
+                  <button class="chat-btn">Chat</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- hero-grid -->
+    </div> <!-- hero -->
+
+    <!-- Nearby / Recommendation row below hero for desktop -->
+    <div class="cards-row">
+      <div style="flex:1; min-width: 300px;">
+        <div class="nearby">
+          <div class="section-header">
+            <div>Popular Near You</div>
+            <div style="font-size:0.8rem; color:#4A6CFF; cursor:pointer;">See all &rarr;</div>
+          </div>
+          <div class="card-list">
+            <div class="profile-card">
+              <div class="profile-top">
+                <div class="avatar">S</div>
+                <div class="profile-info">
+                  <p class="name">Sophia Lee</p>
+                  <p class="role">Axprydling</p>
+                  <div class="rating">★★★★☆ <span style="margin-left:4px; font-size:0.65rem;">5th</span></div>
+                </div>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content: space-between; align-items:center;">
+                <div style="font-size:0.75rem;">Almost papay</div>
+                <button class="book-btn">Book Now</button>
+              </div>
+            </div>
+            <div class="profile-card">
+              <div class="profile-top">
+                <div class="avatar">M</div>
+                <div class="profile-info">
+                  <p class="name">Müchael Chen</p>
+                  <p class="role">Expeding</p>
+                  <div class="rating">★★★★★ <span style="margin-left:4px; font-size:0.65rem;">Onivy</span></div>
+                </div>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content: space-between; align-items:center;">
+                <div style="font-size:0.75rem;">Availability</div>
+                <button class="book-btn">Book Now</button>
+              </div>
+            </div>
+            <div class="profile-card">
+              <div class="profile-top">
+                <div class="avatar">P</div>
+                <div class="profile-info">
+                  <p class="name">PAlá Shirman</p>
+                  <p class="role">Assisient</p>
+                  <div class="rating">★★★★☆ <span style="margin-left:4px; font-size:0.65rem;">3 mn</span></div>
+                </div>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content: space-between; align-items:center;">
+                <div style="font-size:0.75rem;">Huote m off-racid</div>
+                <button class="book-btn">Book Now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1; min-width: 300px;">
+        <div class="recommendations">
+          <div class="section-header">
+            <div>Recommender</div>
+            <div style="font-size:0.8rem; color:#4A6CFF; cursor:pointer;">See all &rarr;</div>
+          </div>
+          <div class="card-list">
+            <!-- repeat similar cards as above or customized -->
+            <div class="profile-card">
+              <div class="profile-top">
+                <div class="avatar">J</div>
+                <div class="profile-info">
+                  <p class="name">Jayob. M.</p>
+                  <p class="role">4,500 reviews</p>
+                  <div class="rating">3.8</div>
+                </div>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content: space-between; align-items:center;">
+                <div style="font-size:0.75rem;">—</div>
+                <button class="book-btn">Book Now</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- container -->
+
+</body>
+</html>
